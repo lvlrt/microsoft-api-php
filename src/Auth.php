@@ -6,7 +6,7 @@ use myPHPnotes\Microsoft\Handlers\Session;
 
 class Auth
 {
-    protected $host = 'https://login.microsoftonline.com/';
+    protected $host;
     protected $resource = 'https://graph.microsoft.com/';
     protected $tenant_id;
     protected $client_id;
@@ -16,19 +16,23 @@ class Auth
     protected $guzzle;
     protected $accessToken;
     protected $refreshToken;
+
     public function __construct(
         string $tenant_id,
         string $client_id,
         string $client_secret,
         string $redirect_uri,
         array $scopes = [],
-        bool $sslVerify = true
+        bool $sslVerify = true,
+        string $host = 'https://login.microsoftonline.com/'
     ) {
         $this->tenant_id = $tenant_id;
         $this->client_id = $client_id;
         $this->client_secret = $client_secret;
         $this->redirect_uri = $redirect_uri;
         $this->scopes = $scopes;
+        $this->host = $host;
+
         Session::set('host', $this->host);
         Session::set('resource', $this->resource);
         Session::set('tenant_id', $tenant_id);
@@ -36,9 +40,11 @@ class Auth
         Session::set('client_secret', $client_secret);
         Session::set('redirect_uri', $redirect_uri);
         Session::set('scopes', $scopes);
+
         if (!Session::get('state')) {
             Session::set('state', random_int(1, 200000));
         }
+
         $this->guzzle = new \GuzzleHttp\Client([
             'verify' => $sslVerify,
         ]);
